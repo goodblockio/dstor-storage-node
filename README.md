@@ -12,8 +12,8 @@ This was built on Ubuntu 18.04. I am sure it will also run on 20.04 but we have 
 ### Create your IPFS data directory manually. Best practice dictates that this directory should be on a file system that is separate from your OS. This file system also needs to be very large. 
 
 #### Clone the git repo in your dStore /home/dstor_user directory
-* git clone https://github.com/jbuice/dStor-Outpost
-* cd dStor-Outpost
+* git clone https://github.com/goodblockio/dstor-storage-node
+* cd dstor-storage-node
 
 #### EDIT: pre-reqs.sh and setup.sh to your needs. Please read my comments...there are not many.
 
