@@ -4,8 +4,8 @@ This was built on Ubuntu 18.04. I am sure it will also run on 20.04 but we have 
 
 ### Create your own user to install and run dstor under. Do not run as root.
 
-* adduser <username>
-* usermod -aG sudo <username>
+* adduser _username_
+* usermod -aG sudo _username_
 * sudo apt update && sudo apt upgrade -y
 * Reboot if needed.
   
@@ -24,7 +24,7 @@ This was built on Ubuntu 18.04. I am sure it will also run on 20.04 but we have 
 * Now Run:
   * ./setup.sh
   
-#### Edit ecosystem.config.js and put your Storagenode API key from app.dstor.cloud where the ************** are. 
+#### Obtain your Outpost API Key at app.dstor.cloud and edit the ecosystem.config.js by adding your Storagenode API key from app.dstor.cloud where the ************** are. 
 
 #### You now need to securly obtain the **swarm.key** and Wireguard config files from the dStor team.
 * Place swarm.key in the root of your IPFS directory.
@@ -36,5 +36,3 @@ This was built on Ubuntu 18.04. I am sure it will also run on 20.04 but we have 
   * **nohup ./start_ipfs.sh > ipfs.log 2>&1 &**
   * **pm2 start ecosystem.config.js**
 
-
-  
