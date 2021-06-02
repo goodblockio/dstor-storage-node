@@ -15,7 +15,7 @@ sudo ufw allow from 10.22.0.0/22 to any port 5001
 sudo ufw enable
 
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y git jq nginx certbot python3-certbot-nginx wireguard
+sudo apt install -y nginx certbot python3-certbot-nginx wireguard
 
 curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh
 sudo bash nodesource_setup.sh
