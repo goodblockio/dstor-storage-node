@@ -20,7 +20,7 @@ This was built on Ubuntu 18.04. I am sure it will also run on 20.04 but we have 
 * Run:
   * source ./pre-reqs.sh
   
-#### EDIT server_name  "node.dstor.cloud;" inside storagenode.nginx to your node name!!
+#### EDIT server_name  "nodename.dstor.cloud;" inside storagenode.nginx to your node name!!
 * Now Run:
   * ./setup.sh
   
