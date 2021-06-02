@@ -1,0 +1,20 @@
+{
+  "name": "outpost-worker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "dotenv": "^8.2.0",
+    "ipfs-http-client": "^46.0.0",
+    "pino": "^6.5.0",
+    "pino-pretty": "^4.1.0",
+    "systeminformation": "^4.26.10",
+    "ws": "^7.3.1"
+  }
+}

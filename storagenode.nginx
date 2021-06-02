@@ -1,0 +1,9 @@
+server {
+    server_name  YOUNODENAME.dstor.cloud;
+    location / {
+        return 301 https://dstor.cloud;
+    }
+    location /ipfs {
+        proxy_pass http://127.0.0.1:8080;
+    }
+}
