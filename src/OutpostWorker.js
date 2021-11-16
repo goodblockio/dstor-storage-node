@@ -1,6 +1,7 @@
 const OutpostClient = require('./OutpostClient')
 const sysinfo = require('systeminformation');
-const IpfsHttpClient = require('ipfs-http-client')
+const { create, CID } = require('ipfs-http-client')
+const all = require('it-all')
 
 const pino = require('pino')
 require('pino-pretty')
@@ -10,7 +11,7 @@ class OutpostWorker {
     constructor() {
         this._connectionClosedCount = 0
 
-        this.ipfs = IpfsHttpClient(process.env.IPFS_API)
+        this.ipfs = create(process.env.IPFS_API)
 
         this.logger = pino({
             prettyPrint: { colorize: true },
@@ -28,17 +29,17 @@ class OutpostWorker {
         this._client.send(data)
     }
 
-    handleMessageObject(messageObj) {
+    async handleMessageObject(messageObj) {
         switch (messageObj.type) {
             case 'login':
                 this.logger.info(`Login success=${messageObj.success}`)
                 break
             case 'pin':
-                this.handlePin(messageObj)
-                break
+                return this.handlePin(messageObj)
             case 'unpin':
-                this.handleUnpin(messageObj)
-                break
+                return this.handleUnpin(messageObj)
+            case 'to-be-pinned':
+                return this.handleListToBePinned(messageObj)
             default:
                 this.logger.error(`Unknown message type: ${messageObj.type} with message: ${JSON.stringify(messageObj)}`)
         }
@@ -71,14 +72,32 @@ class OutpostWorker {
         setTimeout(this.start.bind(this), backoffMs)
     }
 
-    handlePin(messageObj) {
-        this.logger.info(`Pinning file hash: ${messageObj.fileHash}`)
-        this.ipfs.pin.add(new IpfsHttpClient.CID(messageObj.fileHash));
+    async handlePin(messageObj) {
+        const fileHash = messageObj.fileHash
+        this.logger.info(`Pinning file hash: ${fileHash}`)
+        await this.ipfs.pin.add(CID.parse(fileHash))
+        this.logger.info(`File hash pinned: ${fileHash}`)
     }
 
-    handleUnpin(messageObj) {
-        this.logger.info(`Unpinning file hash: ${messageObj.fileHash}`)
-        this.ipfs.pin.rm(new IpfsHttpClient.CID(messageObj.fileHash));
+    async handleUnpin(messageObj) {
+        const fileHash = messageObj.fileHash
+        this.logger.info(`Unpinning file hash: ${fileHash}`)
+        await this.ipfs.pin.rm(CID.parse(fileHash))
+        this.logger.info(`File hash unpinned: ${fileHash}`)
+    }
+
+    async handleListToBePinned(messageObj){
+        this.logger.info('Handling list of hashes to be pinned')
+        const CIDsToBePinned = messageObj.data.map(CID.parse)
+        const currentlyPinnedCIDs = (
+            await all(this.ipfs.pin.ls())
+        ).filter(d => d.type !== 'indirect').map(d => d.cid)
+        
+        const pinPromises = CIDsToBePinned.filter(cid => !currentlyPinnedCIDs.find(cid.equals)).map(this.handlePin)
+        const unpinPromises = currentlyPinnedCIDs.filter(cid => !CIDsToBePinned.find(cid.equals)).map(this.handleUnpin)
+        
+        await Promise.all([...pinPromises, ...unpinPromises])
+        this.logger.info('List of hashes to be pinned has been handled')
     }
 }
 
