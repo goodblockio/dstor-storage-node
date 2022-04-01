@@ -2,6 +2,7 @@ const OutpostClient = require('./OutpostClient')
 const sysinfo = require('systeminformation');
 const { create, CID } = require('ipfs-http-client')
 const all = require('it-all')
+const drain = require('it-drain')
 
 const pino = require('pino')
 require('pino-pretty')
@@ -84,6 +85,8 @@ class OutpostWorker {
         this.logger.info(`Unpinning file hash: ${fileHash}`)
         await this.ipfs.pin.rm(CID.parse(fileHash))
         this.logger.info(`File hash unpinned: ${fileHash}`)
+
+        await this.callGc()
     }
 
     async handleListToBePinned(messageObj){
@@ -98,6 +101,12 @@ class OutpostWorker {
         
         await Promise.all([...pinPromises, ...unpinPromises])
         this.logger.info('List of hashes to be pinned has been handled')
+        
+        await this.callGc()
+    }
+
+    async callGc() {
+        await drain(this.ipfs.repo.gc())
     }
 }
 
