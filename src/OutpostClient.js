@@ -70,7 +70,7 @@ class OutpostClient {
     }
 
     async onMessage(message) {
-        this._worker.handleMessageObject(JSON.parse(message.data))
+        await this._worker.handleMessageObject(JSON.parse(message.data))
         this.logger.info('message: ' + message.data)
     }
 

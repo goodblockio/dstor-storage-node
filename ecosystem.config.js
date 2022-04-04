@@ -5,10 +5,10 @@ module.exports = {
         script: './main.js',
         env: {
           NODE_ENV: 'mainnet',
-          OUTPOST_API_KEY: '****************************************************',
-          GATEWAY_URL: 'https://api.dstor.cloud',
-          GATEWAY_WS_URL: 'wss://api.dstor.cloud',
-          IPFS_API: 'http://127.0.0.1:5001'
+          OUTPOST_API_KEY: process.env.OUTPOST_API_KEY,
+          GATEWAY_URL: process.env.GATEWAY_URL,
+          GATEWAY_WS_URL: process.env.GATEWAY_WS_URL,
+          IPFS_API: process.env.IPFS_API
         },
       },
     ],
