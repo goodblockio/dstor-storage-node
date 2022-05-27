@@ -70,8 +70,13 @@ class OutpostClient {
     }
 
     async onMessage(message) {
+        let loggerMsg = `message: ${message.data}`
+        if (loggerMsg.length > 1000){
+            loggerMsg = loggerMsg.slice(0, 1000) + '...'
+        }
+        this.logger.info(loggerMsg)
+        
         await this._worker.handleMessageObject(JSON.parse(message.data))
-        this.logger.info('message: ' + message.data)
     }
 
     _sendPing() {
