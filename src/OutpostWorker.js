@@ -73,33 +73,93 @@ class OutpostWorker {
         setTimeout(this.start.bind(this), backoffMs)
     }
 
-    async handlePin(messageObj) {
+    async handlePin(messageObj, withLogging=true) {
         const fileHash = messageObj.fileHash
-        this.logger.info(`Pinning file hash: ${fileHash}`)
-        await this.ipfs.pin.add(CID.parse(fileHash))
-        this.logger.info(`File hash pinned: ${fileHash}`)
+        
+        if (withLogging) {
+            this.logger.info(`Pinning file hash: ${fileHash}`)
+        }
+        
+        await this.ipfs.pin.add(CID.parse(fileHash), {timeout: 10000})
+        
+        if (withLogging) {
+            this.logger.info(`File hash pinned: ${fileHash}`)
+        }
     }
 
-    async handleUnpin(messageObj) {
+    async handleUnpin(messageObj, withGc=true, withLogging=true) {
         const fileHash = messageObj.fileHash
-        this.logger.info(`Unpinning file hash: ${fileHash}`)
+        
+        if (withLogging) {
+            this.logger.info(`Unpinning file hash: ${fileHash}`)
+        }
+        
         await this.ipfs.pin.rm(CID.parse(fileHash))
-        this.logger.info(`File hash unpinned: ${fileHash}`)
+        
+        if (withLogging) {
+            this.logger.info(`File hash unpinned: ${fileHash}`)
+        }
 
-        await this.callGc()
+        if (withGc) {
+            await this.callGc()
+        }
     }
 
     async handleListToBePinned(messageObj){
         this.logger.info('Handling list of hashes to be pinned')
-        const CIDsToBePinned = messageObj.data.map(CID.parse)
-        const currentlyPinnedCIDs = (
+        const hashesToBePinned = messageObj.data
+        const currentlyPinnedHashes = (
             await all(this.ipfs.pin.ls())
-        ).filter(d => d.type !== 'indirect').map(d => d.cid)
+        ).filter(d => d.type !== 'indirect').map(d => d.cid.toString())
+
+        const hashesToPin = hashesToBePinned.filter(
+            hash => !currentlyPinnedHashes.find(el => hash === el)
+        )
+        const hashesToUnpin = currentlyPinnedHashes.filter(
+            hash => !hashesToBePinned.find(el => hash === el)
+        )
+
+        const noExceptions = async (func, ...args) => {
+            try {
+                await func(...args)
+            } catch (e) {
+                this.logger.error(e)
+            }
+        }
+
+        const getListChunked = (array, chunkSize) => (
+            Array(Math.ceil(array.length / chunkSize))
+            .fill()
+            .map((_, index) => index * chunkSize)
+            .map(begin => array.slice(begin, begin + chunkSize))
+        )
+
+        const chunkSize = 10000
         
-        const pinPromises = CIDsToBePinned.filter(cid => !currentlyPinnedCIDs.find(cid.equals)).map(this.handlePin)
-        const unpinPromises = currentlyPinnedCIDs.filter(cid => !CIDsToBePinned.find(cid.equals)).map(this.handleUnpin)
+        let count = 0
+        const filesToPinNumber = hashesToPin.length
+        for (const hashesChunk of getListChunked(hashesToPin, chunkSize)){
+            this.logger.info(`${count * chunkSize} of ${filesToPinNumber} hashes pinned`)
+            await Promise.all(
+                hashesChunk.map(
+                    hash => noExceptions(obj => this.handlePin(obj, false), {fileHash: hash})
+                )
+            )
+            count += 1
+        }
+
+        count = 0
+        const filesToUnpinNumber = hashesToUnpin.length
+        for (const hashesChunk of getListChunked(hashesToUnpin, chunkSize)){
+            this.logger.info(`${count * chunkSize} of ${filesToUnpinNumber} hashes unpinned`)
+            await Promise.all(
+                hashesChunk.map(
+                    hash => noExceptions(obj => this.handleUnpin(obj, false, false), {fileHash: hash})
+                )
+            )
+            count += 1
+        }
         
-        await Promise.all([...pinPromises, ...unpinPromises])
         this.logger.info('List of hashes to be pinned has been handled')
         
         await this.callGc()
