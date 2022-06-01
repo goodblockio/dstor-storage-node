@@ -8,6 +8,8 @@ const cron = require('node-cron')
 const pino = require('pino')
 require('pino-pretty')
 
+const fiveMinutesDeadlineInMs = 5 * 60 * 1000
+
 class OutpostWorker {
 
     constructor() {
@@ -87,7 +89,7 @@ class OutpostWorker {
             this.logger.info(`Pinning file hash: ${fileHash}`)
         }
         
-        await this.ipfs.pin.add(CID.parse(fileHash), {timeout: 10000})
+        await this.ipfs.pin.add(CID.parse(fileHash), {timeout: fiveMinutesDeadlineInMs})
         
         if (withLogging) {
             this.logger.info(`File hash pinned: ${fileHash}`)
