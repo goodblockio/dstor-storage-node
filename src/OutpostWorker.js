@@ -3,6 +3,7 @@ const sysinfo = require('systeminformation');
 const { create, CID } = require('ipfs-http-client')
 const all = require('it-all')
 const drain = require('it-drain')
+const cron = require('node-cron')
 
 const pino = require('pino')
 require('pino-pretty')
@@ -18,6 +19,12 @@ class OutpostWorker {
             prettyPrint: { colorize: true },
             name: 'OutpostClient'
         })
+
+        cron.schedule(
+            "30 9 * * *",
+            () => this.callGc(),
+            {scheduled: true, timezone: "UTC"}
+        );
     }
 
     async start() {
@@ -87,8 +94,9 @@ class OutpostWorker {
         }
     }
 
-    async handleUnpin(messageObj, withGc=true, withLogging=true) {
+    async handleUnpin(messageObj, withLogging=true) {
         const fileHash = messageObj.fileHash
+        const forceGc = messageObj.forceGc
         
         if (withLogging) {
             this.logger.info(`Unpinning file hash: ${fileHash}`)
@@ -100,7 +108,7 @@ class OutpostWorker {
             this.logger.info(`File hash unpinned: ${fileHash}`)
         }
 
-        if (withGc) {
+        if (forceGc) {
             await this.callGc()
         }
     }
@@ -154,7 +162,7 @@ class OutpostWorker {
             this.logger.info(`${count * chunkSize} of ${filesToUnpinNumber} hashes unpinned`)
             await Promise.all(
                 hashesChunk.map(
-                    hash => noExceptions(obj => this.handleUnpin(obj, false, false), {fileHash: hash})
+                    hash => noExceptions(obj => this.handleUnpin(obj, false), {fileHash: hash})
                 )
             )
             count += 1
