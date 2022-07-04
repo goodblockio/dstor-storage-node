@@ -6,6 +6,7 @@ const drain = require('it-drain')
 const cron = require('node-cron')
 
 const pino = require('pino')
+const WGManager = require('./WGManager')
 require('pino-pretty')
 
 const fiveMinutesDeadlineInMs = 5 * 60 * 1000
@@ -33,6 +34,7 @@ class OutpostWorker {
         this._client = new OutpostClient(this)
         this._client.connect()
         this._staticStatsSent = false
+        this._wgmanager = new WGManager()
     }
 
     send(data) {
@@ -43,13 +45,16 @@ class OutpostWorker {
         switch (messageObj.type) {
             case 'login':
                 this.logger.info(`Login success=${messageObj.success}`)
-                break
+                this.sendCurrentPeerConfig()
+                break;
             case 'pin':
                 return this.handlePin(messageObj)
             case 'unpin':
                 return this.handleUnpin(messageObj)
             case 'to-be-pinned':
                 return this.handleListToBePinned(messageObj)
+            case 'update-peers-config':
+                return this.updatePeersConfig(messageObj)
             default:
                 this.logger.error(`Unknown message type: ${messageObj.type} with message: ${JSON.stringify(messageObj)}`)
         }
@@ -177,6 +182,18 @@ class OutpostWorker {
 
     async callGc() {
         await drain(this.ipfs.repo.gc())
+    }
+
+    sendCurrentPeerConfig() {
+        const currentConfig = this._wgmanager.getPeerConfig()
+        this.send({
+            type: 'peer-data',
+            data: currentConfig
+        })
+    }
+
+    async updatePeersConfig(messageObj) {
+        await this._wgmanager.replaceCurrentConfigAndReload(messageObj.confContent, messageObj.swarmKey)
     }
 }
 
