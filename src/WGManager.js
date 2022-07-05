@@ -4,7 +4,25 @@ require('pino-pretty')
 
 
 class WGManager {
-  currentPeerData = process.env.SERVER_PEER_DATA
+  currentPeerData = {
+    Name: process.env.SERVER_PEER_NAME,
+    Address: process.env.SERVER_PEER_ADDRESS,
+    Endpoint: process.env.SERVER_PEER_ENDPOINT,
+    AllowedIPs: process.env.SERVER_PEER_ALLOWED_IPS,
+    ListenPort: process.env.SERVER_PEER_LISTEN_PORT,
+    PersistentKeepalive: process.env.SERVER_PEER_PERSISTENT_KEEPALIVE,
+    FwMark: "",
+    PrivateKey: process.env.SERVER_PEER_PRIVATE_KEY,
+    DNS: "",
+    MTU: "",
+    Table: "",
+    PreUp: "",
+    PostUp: "",
+    PreDown: "",
+    PostDown: "",
+    SaveConfig: ""
+  }
+  
   sudoPWD = process.env.SUDOPWD
   wg0ConfPath = process.env.WG0_CONF_PATH
   ipfsSwarmKeyPath = process.env.IPFS_SWARM_KEY_PATH
