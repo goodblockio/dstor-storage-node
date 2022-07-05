@@ -111,13 +111,13 @@ class WGManager {
     )
 
     await this.spawnProcessAwaitable(
-      'sudo', ['-S', 'wg-quick', 'down', 'wg0'], {},
+      'sudo', ['-S', 'wg-quick', 'down', 'wg0'], { stdio: ['pipe', 'pipe', 'ignore'] },
       'An error occurred while stopping wg using wg-quick to reload',
       this.sudoPWD
     )
 
     await this.spawnProcessAwaitable(
-      'sudo', ['-S', 'wg-quick', 'up', 'wg0'], {},
+      'sudo', ['-S', 'wg-quick', 'up', 'wg0'], { stdio: ['pipe', 'pipe', 'ignore'] },
       'An error occurred while starting wg using wg-quick to reload',
       this.sudoPWD
     )
