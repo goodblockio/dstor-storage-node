@@ -1,5 +1,6 @@
 const fs = require('fs')
 const { spawn } = require("child_process")
+var stream = require('stream');
 const pino = require('pino')
 require('pino-pretty')
 
@@ -34,26 +35,39 @@ class WGManager {
     name: 'WGManager'
   })
 
-  async spawnProcessAwaitable(cmd, args, options, errorMsg) {
+  async spawnProcessAwaitable(cmd, args, options, errorMsg, stdin = null, ignoreErrors = false) {
     return new Promise(
       (resolve, reject) => {
         const proc = spawn(cmd, args, options)
+
+        if (options.detached) {
+          proc.unref(); resolve(); return;
+        }
+
         let stdErrMessage = ''
 
-        proc.stdout.on('data', () => {})
-        proc.stderr.on('data', buf => { stdErrMessage += buf.toString() + '\n' })
-        
+        proc.stdout && proc.stdout.on('data', () => { })
+        proc.stderr && proc.stderr.on('data', buf => { stdErrMessage += buf.toString() + '\n' })
+
         proc.on('error', function (error) {
+          if (ignoreErrors) { resolve() }
           reject(new Error(`${errorMsg}: ${error}`))
         })
 
         proc.on('close', function (code) {
-          if (code !== 0) {
+          if (code !== 0 && !ignoreErrors) {
             reject(new Error(`${errorMsg}: ${stdErrMessage}`))
           } else {
             resolve()
           }
         })
+
+        if (stdin) {
+          const stdinStream = new stream.Readable()
+          stdinStream.push(stdin)
+          stdinStream.push(null)
+          stdinStream.pipe(proc.stdin)
+        }
       }
     )
   }
@@ -74,33 +88,38 @@ class WGManager {
     fs.writeFileSync(tempSwarmFileName, swarmKey)
 
     await this.spawnProcessAwaitable(
-      'echo', [this.sudoPWD, '|', 'sudo', '-S', 'mv', tempSwarmFileName, swarmFileDestination], {},
-      `An error occurred while moving swarm key file to ${swarmFileDestination}`
+      'sudo', ['-S', 'mv', tempSwarmFileName, swarmFileDestination], {},
+      `An error occurred while moving swarm key file to ${swarmFileDestination}`,
+      this.sudoPWD
     )
 
     await this.spawnProcessAwaitable(
-      'echo', [this.sudoPWD, '|', 'sudo', '-S', 'pkill', 'ipfs'], {},
-      `An error occurred while stopping ipfs daemon`
+      'sudo', ['-S', 'pkill', 'ipfs'], {},
+      `An error occurred while stopping ipfs daemon`,
+      this.sudoPWD, true
     )
 
     await this.spawnProcessAwaitable(
-      this.IPFSStartUpScriptPath, ['>', '/dev/null', '2>&1', '&'], {},
+      this.IPFSStartUpScriptPath, [], { detached: true, stdio: 'ignore' },
       `An error occurred while starting ipfs daemon`
     )
 
     await this.spawnProcessAwaitable(
-      'echo', [this.sudoPWD, '|', 'sudo', '-S', 'mv', tempConfigName, confFileDestination], {},
-      `An error occurred while moving server conf file to ${confFileDestination}`
+      'sudo', ['-S', 'mv', tempConfigName, confFileDestination], {},
+      `An error occurred while moving server conf file to ${confFileDestination}`,
+      this.sudoPWD
     )
 
     await this.spawnProcessAwaitable(
-      'echo', [this.sudoPWD, '|', 'sudo', '-S', 'wg-quick', 'down', 'wg0'], {},
-      'An error occurred while stopping wg using wg-quick to reload'
+      'sudo', ['-S', 'wg-quick', 'down', 'wg0'], {},
+      'An error occurred while stopping wg using wg-quick to reload',
+      this.sudoPWD
     )
 
     await this.spawnProcessAwaitable(
-      'echo', [this.sudoPWD, '|', 'sudo', '-S', 'wg-quick', 'up', 'wg0'], {},
-      'An error occurred while starting wg using wg-quick to reload'
+      'sudo', ['-S', 'wg-quick', 'up', 'wg0'], {},
+      'An error occurred while starting wg using wg-quick to reload',
+      this.sudoPWD
     )
 
     this.logger.info('Replaced current wg0.conf, swarm.key and reloaded successfully')
