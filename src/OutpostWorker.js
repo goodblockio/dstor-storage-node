@@ -4,9 +4,9 @@ const { create, CID } = require('ipfs-http-client')
 const all = require('it-all')
 const drain = require('it-drain')
 const cron = require('node-cron')
+const WGManager = require('./WGManager')
 
 const pino = require('pino')
-const WGManager = require('./WGManager')
 require('pino-pretty')
 
 const fiveMinutesDeadlineInMs = 5 * 60 * 1000
@@ -185,11 +185,13 @@ class OutpostWorker {
     }
 
     sendCurrentPeerConfig() {
+        this.logger.debug('Sending current peer config...')
         const currentConfig = this._wgmanager.getPeerConfig()
         this.send({
             type: 'peer-data',
             data: currentConfig
         })
+        this.logger.debug('Current peer config sent')
     }
 
     async updatePeersConfig(messageObj) {

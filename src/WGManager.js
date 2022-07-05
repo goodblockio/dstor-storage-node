@@ -1,4 +1,6 @@
 const fs = require('fs')
+const pino = require('pino')
+require('pino-pretty')
 
 
 class WGManager {
@@ -6,6 +8,11 @@ class WGManager {
   sudoPWD = process.env.SUDOPWD
   wg0ConfPath = process.env.WG0_CONF_PATH
   ipfsSwarmKeyPath = process.env.IPFS_SWARM_KEY_PATH
+
+  logger = pino({
+    prettyPrint: { colorize: true },
+    name: 'WGManager'
+  })
 
   async spawnProcessAwaitable(cmd, args, options, errorMsg) {
     return new Promise(
@@ -36,6 +43,7 @@ class WGManager {
   }
 
   async replaceCurrentConfigAndReload(confContent, swarmKey) {
+    this.logger.debug('Replacing current wg0.conf, swarm.key and reloading...')
     const tempConfigName = 'tmp.conf'
     const tempSwarmFileName = 'swarm.key'
 
@@ -64,6 +72,8 @@ class WGManager {
       'wg-quick', ['up', 'wg0'], {},
       'An error occurred while starting wg using wg-quick to reload'
     )
+
+    this.logger.debug('Replaced current wg0.conf, swarm.key and reloaded successfully')
   }
 }
 
