@@ -5,14 +5,14 @@ require('pino-pretty')
 
 class WGManager {
   currentPeerData = {
-    Name: process.env.SERVER_PEER_NAME,
-    Address: process.env.SERVER_PEER_ADDRESS,
-    Endpoint: process.env.SERVER_PEER_ENDPOINT,
-    AllowedIPs: process.env.SERVER_PEER_ALLOWED_IPS,
-    ListenPort: process.env.SERVER_PEER_LISTEN_PORT,
-    PersistentKeepalive: process.env.SERVER_PEER_PERSISTENT_KEEPALIVE,
+    Name: process.env.NODE_PEER_NAME,
+    Address: process.env.NODE_PEER_ADDRESS,
+    Endpoint: process.env.NODE_PEER_ENDPOINT,
+    AllowedIPs: process.env.NODE_PEER_ALLOWED_IPS || "",
+    ListenPort: process.env.NODE_PEER_LISTEN_PORT || "",
+    PersistentKeepalive: process.env.NODE_PEER_PERSISTENT_KEEPALIVE || "",
     FwMark: "",
-    PrivateKey: process.env.SERVER_PEER_PRIVATE_KEY,
+    PrivateKey: process.env.NODE_PEER_PRIVATE_KEY || "",
     DNS: "",
     MTU: "",
     Table: "",
