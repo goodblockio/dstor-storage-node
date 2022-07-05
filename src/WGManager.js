@@ -22,7 +22,7 @@ class WGManager {
     PostDown: "",
     SaveConfig: ""
   }
-  
+
   sudoPWD = process.env.SUDOPWD
   wg0ConfPath = process.env.WG0_CONF_PATH
   ipfsSwarmKeyPath = process.env.IPFS_SWARM_KEY_PATH
@@ -61,7 +61,7 @@ class WGManager {
   }
 
   async replaceCurrentConfigAndReload(confContent, swarmKey) {
-    this.logger.debug('Replacing current wg0.conf, swarm.key and reloading...')
+    this.logger.info('Replacing current wg0.conf, swarm.key and reloading...')
     const tempConfigName = 'tmp.conf'
     const tempSwarmFileName = 'swarm.key'
 
@@ -91,7 +91,7 @@ class WGManager {
       'An error occurred while starting wg using wg-quick to reload'
     )
 
-    this.logger.debug('Replaced current wg0.conf, swarm.key and reloaded successfully')
+    this.logger.info('Replaced current wg0.conf, swarm.key and reloaded successfully')
   }
 }
 

@@ -185,13 +185,13 @@ class OutpostWorker {
     }
 
     sendCurrentPeerConfig() {
-        this.logger.debug('Sending current peer config...')
+        this.logger.info('Sending current peer config...')
         const currentConfig = this._wgmanager.getPeerConfig()
         this.send({
             type: 'peer-data',
             data: currentConfig
         })
-        this.logger.debug('Current peer config sent')
+        this.logger.info('Current peer config sent')
     }
 
     async updatePeersConfig(messageObj) {
