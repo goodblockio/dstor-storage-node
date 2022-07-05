@@ -35,7 +35,7 @@ class WGManager {
     name: 'WGManager'
   })
 
-  async spawnProcessAwaitable(cmd, args, options, errorMsg, stdin = null, ignoreErrors = false) {
+  async spawnProcessAwaitable(cmd, args, options, errorMsg, ignoreErrors = false) {
     return new Promise(
       (resolve, reject) => {
         const proc = spawn(cmd, args, options)
@@ -61,13 +61,6 @@ class WGManager {
             resolve()
           }
         })
-
-        if (stdin) {
-          const stdinStream = new stream.Readable()
-          stdinStream.push(stdin)
-          stdinStream.push(null)
-          stdinStream.pipe(proc.stdin)
-        }
       }
     )
   }
@@ -88,15 +81,13 @@ class WGManager {
     fs.writeFileSync(tempSwarmFileName, swarmKey)
 
     await this.spawnProcessAwaitable(
-      'sudo', ['-S', 'mv', tempSwarmFileName, swarmFileDestination], {},
-      `An error occurred while moving swarm key file to ${swarmFileDestination}`,
-      this.sudoPWD
+      'bash', ['-c', `echo ${this.sudoPWD} | sudo -S mv ${tempSwarmFileName} ${swarmFileDestination}`], {},
+      `An error occurred while moving swarm key file to ${swarmFileDestination}`
     )
 
     await this.spawnProcessAwaitable(
-      'sudo', ['-S', 'pkill', 'ipfs'], {},
-      `An error occurred while stopping ipfs daemon`,
-      this.sudoPWD, true
+      'bash', ['-c', `echo ${this.sudoPWD} | sudo -S pkill ipfs`], {},
+      `An error occurred while stopping ipfs daemon`, true
     )
 
     await this.spawnProcessAwaitable(
@@ -105,21 +96,18 @@ class WGManager {
     )
 
     await this.spawnProcessAwaitable(
-      'sudo', ['-S', 'mv', tempConfigName, confFileDestination], {},
-      `An error occurred while moving server conf file to ${confFileDestination}`,
-      this.sudoPWD
+      'bash', ['-c', `echo ${this.sudoPWD} | sudo -S mv ${tempConfigName} ${confFileDestination}`], {},
+      `An error occurred while moving server conf file to ${confFileDestination}`
     )
 
     await this.spawnProcessAwaitable(
-      'sudo', ['-S', 'wg-quick', 'down', 'wg0'], { stdio: ['pipe', 'pipe', 'ignore'] },
-      'An error occurred while stopping wg using wg-quick to reload',
-      this.sudoPWD
+      'bash', ['-c', `echo ${this.sudoPWD} | sudo -S wg-quick down wg0`], {},
+      'An error occurred while stopping wg using wg-quick to reload', true
     )
 
     await this.spawnProcessAwaitable(
-      'sudo', ['-S', 'wg-quick', 'up', 'wg0'], { stdio: ['pipe', 'pipe', 'ignore'] },
-      'An error occurred while starting wg using wg-quick to reload',
-      this.sudoPWD
+      'bash', ['-c', `echo ${this.sudoPWD} | sudo -S wg-quick up wg0`], {},
+      'An error occurred while starting wg using wg-quick to reload'
     )
 
     this.logger.info('Replaced current wg0.conf, swarm.key and reloaded successfully')
