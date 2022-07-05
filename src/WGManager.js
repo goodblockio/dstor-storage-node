@@ -1,4 +1,5 @@
 const fs = require('fs')
+const { spawn } = require("child_process")
 const pino = require('pino')
 require('pino-pretty')
 
@@ -82,12 +83,12 @@ class WGManager {
     )
 
     await this.spawnProcessAwaitable(
-      'wg-quick', ['down', 'wg0'], {},
+      'echo', [this.sudoPWD, '|', 'sudo', '-S', 'wg-quick', 'down', 'wg0'], {},
       'An error occurred while stopping wg using wg-quick to reload'
     )
 
     await this.spawnProcessAwaitable(
-      'wg-quick', ['up', 'wg0'], {},
+      'echo', [this.sudoPWD, '|', 'sudo', '-S', 'wg-quick', 'up', 'wg0'], {},
       'An error occurred while starting wg using wg-quick to reload'
     )
 
