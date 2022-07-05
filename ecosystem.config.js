@@ -5,6 +5,7 @@ module.exports = {
     {
       name: 'outpost-worker',
       script: './main.js',
+      treekill: false,
       env: {
         NODE_ENV: 'mainnet',
         OUTPOST_API_KEY: process.env.OUTPOST_API_KEY,

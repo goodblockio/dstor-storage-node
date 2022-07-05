@@ -1,6 +1,5 @@
 const fs = require('fs')
 const { spawn } = require("child_process")
-var stream = require('stream');
 const pino = require('pino')
 require('pino-pretty')
 
@@ -91,7 +90,7 @@ class WGManager {
     )
 
     await this.spawnProcessAwaitable(
-      this.IPFSStartUpScriptPath, [], { detached: true, stdio: 'ignore' },
+      this.IPFSStartUpScriptPath, ['&'], { detached: true, stdio: 'ignore' },
       `An error occurred while starting ipfs daemon`
     )
 
