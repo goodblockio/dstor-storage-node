@@ -26,6 +26,7 @@ class WGManager {
 
   sudoPWD = process.env.SUDOPWD
   wg0ConfPath = process.env.WG0_CONF_PATH
+  IPFSStartUpScriptPath = process.env.IPFS_START_UP_SCRIPT_PATH
   ipfsSwarmKeyPath = process.env.IPFS_SWARM_KEY_PATH
 
   logger = pino({
@@ -73,13 +74,23 @@ class WGManager {
     fs.writeFileSync(tempSwarmFileName, swarmKey)
 
     await this.spawnProcessAwaitable(
-      'echo', [this.sudoPWD, '|', 'sudo', '-S', 'mv', tempConfigName, confFileDestination], {},
-      `An error occurred while moving server conf file to ${confFileDestination}`
+      'echo', [this.sudoPWD, '|', 'sudo', '-S', 'mv', tempSwarmFileName, swarmFileDestination], {},
+      `An error occurred while moving swarm key file to ${swarmFileDestination}`
     )
 
     await this.spawnProcessAwaitable(
-      'echo', [this.sudoPWD, '|', 'sudo', '-S', 'mv', tempSwarmFileName, swarmFileDestination], {},
-      `An error occurred while moving swarm key file to ${swarmFileDestination}`
+      'echo', [this.sudoPWD, '|', 'sudo', '-S', 'pkill', 'ipfs'], {},
+      `An error occurred while stopping ipfs daemon`
+    )
+
+    await this.spawnProcessAwaitable(
+      this.IPFSStartUpScriptPath, ['>', '/dev/null', '2>&1', '&'], {},
+      `An error occurred while starting ipfs daemon`
+    )
+
+    await this.spawnProcessAwaitable(
+      'echo', [this.sudoPWD, '|', 'sudo', '-S', 'mv', tempConfigName, confFileDestination], {},
+      `An error occurred while moving server conf file to ${confFileDestination}`
     )
 
     await this.spawnProcessAwaitable(

@@ -15,6 +15,7 @@ module.exports = {
         // WGPeersManager ////
         SUDOPWD: process.env.SUDOPWD,
         WG0_CONF_PATH: process.env.WG0_CONF_PATH,
+        IPFS_START_UP_SCRIPT_PATH: process.env.IPFS_START_UP_SCRIPT_PATH,
         IPFS_SWARM_KEY_PATH: process.env.IPFS_SWARM_KEY_PATH,
         NODE_PEER_NAME: process.env.NODE_PEER_NAME,
         NODE_PEER_ADDRESS: process.env.NODE_PEER_ADDRESS,
