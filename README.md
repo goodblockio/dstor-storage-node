@@ -9,32 +9,27 @@ This was built on Ubuntu 18.04. I am sure it will also run on 20.04 but we have 
 * sudo apt update && sudo apt upgrade -y
 * Reboot if needed.
   
-### Create your IPFS data directory manually. Best practice dictates that this directory should be on a file system that is separate from your OS. This file system also needs to be very large. 
+### Create your IPFS data directory manually. Best practice dictates that this directory should be on a file system that is separate from your OS. This file system also needs to be very large. You might use [our main server repo](https://github.com/goodblockio/dstor-node-api). It has its own README with ipfs setup instructions and a `containers/gateway-ipfs` folder with all data required to setup and start ipfs. After you've set up your own ipfs, start it.
 
 #### Clone the git repo in your dStore /home/dstor_user directory
 * git clone https://github.com/goodblockio/dstor-storage-node
 * cd dstor-storage-node
 
 #### EDIT: pre-reqs.sh and setup.sh to your needs. Please read my comments...there are not many.
-
 * Run:
   * source ./pre-reqs.sh
   
-#### EDIT server_name  "nodename.dstor.cloud;" inside storagenode.nginx to your node name!!
+#### EDIT server_name "nodename.dstor.cloud;" inside storagenode.nginx to your node name!!
 * Now Run:
   * ./setup.sh
   
-#### Obtain your Outpost API Key at app.dstor.cloud and edit the ecosystem.config.js by adding your Storagenode API key from app.dstor.cloud where the ************** are. 
+#### Obtain your Outpost API Key at app.dstor.cloud
 
-#### You now need to securly obtain the **swarm.key** and Wireguard config files from the dStor team.
-* Place swarm.key in the root of your IPFS directory.
-* Place your Wireguard config file in **/etc/wireguard/wg0.conf**
-  * Then run: **sudo systemctl start wg-quick@wg0**
-  * Verify you can ping 10.22.0.5
-  
-* Now run:
-  * **nohup ./start_ipfs.sh > ipfs.log 2>&1 &**
-  * **pm2 start ecosystem.config.js**
+#### Use .env.example file to create your own .env file. If you have some questions about the .env values, you can always ask our support team for help.
+
+#### Start (restart) the node server: run `pm2 restart ecosystem.config.js` from `dstor-storage-node` folder
+
+#### To see logs use `pm2 logs`
 
 
 ## Files to pin
