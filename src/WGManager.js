@@ -1,6 +1,8 @@
 const fs = require('fs')
 const { spawn } = require("child_process")
 const pino = require('pino')
+const { wrapPromise, sleep } = require('./utils/misc')
+const axios = require('axios')
 require('pino-pretty')
 
 
@@ -110,11 +112,29 @@ class WGManager {
         'An error occurred while starting wg using wg-quick to reload'
       )
 
+      const IPFSStartTimeout = 120000
+      await wrapPromise(this.awaitForIPFSToStart(), IPFSStartTimeout, new Error('IPFS startup timeout'))
+
       this.logger.info('Replaced current wg0.conf, swarm.key and reloaded successfully')
       return true
     } catch(e) {
       this.logger.error('An error occurred while replacing wg peers config.', e, e.stack)
       return false
+    }
+  }
+
+  async awaitForIPFSToStart() {
+    // Use with wrapPromise only to avoid infinite loop
+    let isStarted = false
+    const oneSecondInMs = 5000
+    while (!isStarted) {
+      try {
+        await axios.get(process.env.IPFS_API, { validateStatus: false })
+        isStarted = true
+      } catch (e) {
+        // thrown when ipfs still not started
+      }
+      await sleep(oneSecondInMs)
     }
   }
 }

@@ -47,17 +47,17 @@ class OutpostWorker {
                 this.logger.info(`Login success=${messageObj.success}`)
                 this.sendCurrentPeerConfig()
                 break;
+            case 'update-peers-config':
+                await this.updatePeersConfig(messageObj)
+                break;
+            case 'to-be-pinned':
+                await this.handleListToBePinned(messageObj)
+                break;
             case 'pin':
                 await this.handlePin(messageObj)
                 break;
             case 'unpin':
                 await this.handleUnpin(messageObj)
-                break;
-            case 'to-be-pinned':
-                await this.handleListToBePinned(messageObj)
-                break;
-            case 'update-peers-config':
-                await this.updatePeersConfig(messageObj)
                 break;
             default:
                 this.logger.error(`Unknown message type: ${messageObj.type} with message: ${JSON.stringify(messageObj)}`)
