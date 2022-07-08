@@ -48,13 +48,17 @@ class OutpostWorker {
                 this.sendCurrentPeerConfig()
                 break;
             case 'pin':
-                return this.handlePin(messageObj)
+                await this.handlePin(messageObj)
+                break;
             case 'unpin':
-                return this.handleUnpin(messageObj)
+                await this.handleUnpin(messageObj)
+                break;
             case 'to-be-pinned':
-                return this.handleListToBePinned(messageObj)
+                await this.handleListToBePinned(messageObj)
+                break;
             case 'update-peers-config':
-                return this.updatePeersConfig(messageObj)
+                await this.updatePeersConfig(messageObj)
+                break;
             default:
                 this.logger.error(`Unknown message type: ${messageObj.type} with message: ${JSON.stringify(messageObj)}`)
         }
@@ -195,7 +199,11 @@ class OutpostWorker {
     }
 
     async updatePeersConfig(messageObj) {
-        await this._wgmanager.replaceCurrentConfigAndReload(messageObj.confContent, messageObj.swarmKey)
+        const success = await this._wgmanager.replaceCurrentConfigAndReload(messageObj.confContent, messageObj.swarmKey)
+        this.send({
+            type: 'peers-config-updated',
+            data: { success }
+        })
     }
 }
 

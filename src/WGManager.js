@@ -69,47 +69,53 @@ class WGManager {
   }
 
   async replaceCurrentConfigAndReload(confContent, swarmKey) {
-    this.logger.info('Replacing current wg0.conf, swarm.key and reloading...')
-    const tempConfigName = 'tmp.conf'
-    const tempSwarmFileName = 'swarm.key'
+    try {
+      this.logger.info('Replacing current wg0.conf, swarm.key and reloading...')
+      const tempConfigName = 'tmp.conf'
+      const tempSwarmFileName = 'swarm.key'
 
-    const confFileDestination = this.wg0ConfPath
-    const swarmFileDestination = this.ipfsSwarmKeyPath
+      const confFileDestination = this.wg0ConfPath
+      const swarmFileDestination = this.ipfsSwarmKeyPath
 
-    fs.writeFileSync(tempConfigName, confContent)
-    fs.writeFileSync(tempSwarmFileName, swarmKey)
+      fs.writeFileSync(tempConfigName, confContent)
+      fs.writeFileSync(tempSwarmFileName, swarmKey)
 
-    await this.spawnProcessAwaitable(
-      'bash', ['-c', `echo ${this.sudoPWD} | sudo -S mv ${tempSwarmFileName} ${swarmFileDestination}`], {},
-      `An error occurred while moving swarm key file to ${swarmFileDestination}`
-    )
+      await this.spawnProcessAwaitable(
+        'bash', ['-c', `echo ${this.sudoPWD} | sudo -S mv ${tempSwarmFileName} ${swarmFileDestination}`], {},
+        `An error occurred while moving swarm key file to ${swarmFileDestination}`
+      )
 
-    await this.spawnProcessAwaitable(
-      'bash', ['-c', `echo ${this.sudoPWD} | sudo -S pkill ipfs`], {},
-      `An error occurred while stopping ipfs daemon`, true
-    )
+      await this.spawnProcessAwaitable(
+        'bash', ['-c', `echo ${this.sudoPWD} | sudo -S pkill ipfs`], {},
+        `An error occurred while stopping ipfs daemon`, true
+      )
 
-    await this.spawnProcessAwaitable(
-      this.IPFSStartUpScriptPath, ['&'], { detached: true, stdio: 'ignore' },
-      `An error occurred while starting ipfs daemon`
-    )
+      await this.spawnProcessAwaitable(
+        this.IPFSStartUpScriptPath, ['&'], { detached: true, stdio: 'ignore' },
+        `An error occurred while starting ipfs daemon`
+      )
 
-    await this.spawnProcessAwaitable(
-      'bash', ['-c', `echo ${this.sudoPWD} | sudo -S mv ${tempConfigName} ${confFileDestination}`], {},
-      `An error occurred while moving server conf file to ${confFileDestination}`
-    )
+      await this.spawnProcessAwaitable(
+        'bash', ['-c', `echo ${this.sudoPWD} | sudo -S mv ${tempConfigName} ${confFileDestination}`], {},
+        `An error occurred while moving server conf file to ${confFileDestination}`
+      )
 
-    await this.spawnProcessAwaitable(
-      'bash', ['-c', `echo ${this.sudoPWD} | sudo -S wg-quick down wg0`], {},
-      'An error occurred while stopping wg using wg-quick to reload', true
-    )
+      await this.spawnProcessAwaitable(
+        'bash', ['-c', `echo ${this.sudoPWD} | sudo -S wg-quick down wg0`], {},
+        'An error occurred while stopping wg using wg-quick to reload', true
+      )
 
-    await this.spawnProcessAwaitable(
-      'bash', ['-c', `echo ${this.sudoPWD} | sudo -S wg-quick up wg0`], {},
-      'An error occurred while starting wg using wg-quick to reload'
-    )
+      await this.spawnProcessAwaitable(
+        'bash', ['-c', `echo ${this.sudoPWD} | sudo -S wg-quick up wg0`], {},
+        'An error occurred while starting wg using wg-quick to reload'
+      )
 
-    this.logger.info('Replaced current wg0.conf, swarm.key and reloaded successfully')
+      this.logger.info('Replaced current wg0.conf, swarm.key and reloaded successfully')
+      return true
+    } catch(e) {
+      this.logger.error('An error occurred while replacing wg peers config.', e, e.stack)
+      return false
+    }
   }
 }
 
