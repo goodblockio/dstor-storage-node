@@ -48,7 +48,7 @@ class OutpostWorker {
         const messageTypesToNotLog = ['hash-crypto-key']
 
         if (!messageTypesToNotLog.includes(messageObj.type)) {
-            let loggerMsg = `message: ${message.data}`
+            let loggerMsg = `message: ${messageObj}`
             if (loggerMsg.length > 1000){
                 loggerMsg = loggerMsg.slice(0, 1000) + '...'
             }
