@@ -26,7 +26,7 @@ class OutpostHttpServer {
         disableRequestLogging: true,
       },
       trustProxy: true,
-      maxParamLength: 300
+      maxParamLength: 500
     })
 
     this.fastify.register(fastifyGracefulShutdown)
