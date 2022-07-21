@@ -1,10 +1,10 @@
-const getObjByHashHandler = async (request, reply) => {
+const getObjByHashHandler = async (httpServer, request, reply) => {
   const encryptedHash = request.params.hash
   const requestPathTail = request.params['*']
 
   let decryptedHash
   try {
-    decryptedHash = this.outpostWorker.decryptHash(encryptedHash)
+    decryptedHash = httpServer.outpostWorker.decryptHash(encryptedHash)
   } catch (e) {
     return reply.code(400).send('Unable to decrypt a hash')
   }

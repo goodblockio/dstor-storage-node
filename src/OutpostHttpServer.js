@@ -48,7 +48,7 @@ class OutpostHttpServer {
   }
 
   initFastifyRoutes() {
-    this.fastify.get('/ipfs/:hash/*', { schema: getObjByHashSchema }, getObjByHashHandler)
+    this.fastify.get('/ipfs/:hash/*', { schema: getObjByHashSchema }, (request, reply) => getObjByHashHandler(this, request, reply))
     this.fastify.get('/ipfs/:hash', { schema: handleNoHashRedirectSchema }, handleNoHashRedirectHandler)
   }
 }
