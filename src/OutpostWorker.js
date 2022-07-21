@@ -208,7 +208,7 @@ class OutpostWorker {
     decryptHash(encryptedHash) {
         const decryptedData = crypto.publicDecrypt(
             this.hashCryptoDecryptKey,
-            encryptedHash
+            decodeURIComponent(encryptedHash)
         )
 
         return decryptedData.toString()
