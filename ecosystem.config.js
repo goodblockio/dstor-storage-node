@@ -8,10 +8,15 @@ module.exports = {
       treekill: false,
       env: {
         NODE_ENV: 'mainnet',
+
+        API_HOST: process.env.API_HOST,
+        API_PORT: process.env.API_PORT,
+
         OUTPOST_API_KEY: process.env.OUTPOST_API_KEY,
         GATEWAY_URL: process.env.GATEWAY_URL,
         GATEWAY_WS_URL: process.env.GATEWAY_WS_URL,
         IPFS_API: process.env.IPFS_API,
+        IPFS_GATEWAY_URL: process.env.IPFS_GATEWAY_URL,
 
         // WGPeersManager ////
         SUDOPWD: process.env.SUDOPWD,
