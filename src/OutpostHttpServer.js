@@ -25,7 +25,8 @@ class OutpostHttpServer {
         timestamp: () => `,"time":"${new Date(Date.now()).toISOString()}"`,
         disableRequestLogging: true,
       },
-      trustProxy: true
+      trustProxy: true,
+      maxParamLength: 300
     })
 
     this.fastify.register(fastifyGracefulShutdown)
