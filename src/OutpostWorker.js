@@ -5,6 +5,7 @@ const all = require('it-all')
 const drain = require('it-drain')
 const cron = require('node-cron')
 const WGManager = require('./WGManager')
+const crypto = require('crypto')
 
 const pino = require('pino')
 require('pino-pretty')
@@ -28,6 +29,8 @@ class OutpostWorker {
             () => this.callGc(),
             {scheduled: true, timezone: "UTC"}
         );
+
+        this.hashCryptoDecryptKey = null
     }
 
     async start() {
@@ -58,6 +61,9 @@ class OutpostWorker {
                 break;
             case 'unpin':
                 await this.handleUnpin(messageObj)
+                break;
+            case 'hash-crypto-key':
+                this.handleNewHashCryptoKey(messageObj)
                 break;
             default:
                 this.logger.error(`Unknown message type: ${messageObj.type} with message: ${JSON.stringify(messageObj)}`)
@@ -182,6 +188,20 @@ class OutpostWorker {
         this.logger.info('List of hashes to be pinned has been handled')
         
         await this.callGc()
+    }
+
+    handleNewHashCryptoKey(messageObj) {
+        const key = messageObj.data
+        this.hashCryptoDecryptKey = key
+    }
+
+    decryptHash(encryptedHash) {
+        const decryptedData = crypto.publicDecrypt(
+            this.hashCryptoDecryptKey,
+            encryptedHash
+        )
+
+        return decryptedData.toString()
     }
 
     async callGc() {
