@@ -3,6 +3,8 @@ const fastifyGracefulShutdown = require('fastify-graceful-shutdown')
 const fastifyReplyFrom = require('@fastify/reply-from')
 
 const pino = require('pino')
+const { getObjByHashSchema, handleNoHashRedirectSchema } = require('./utils/httpSchemas')
+const { getObjByHashHandler, handleNoHashRedirectHandler } = require('./utils/httpHandlers')
 require('pino-pretty')
 
 class OutpostHttpServer {
@@ -45,47 +47,8 @@ class OutpostHttpServer {
   }
 
   initFastifyRoutes() {
-    this.fastify.get(
-      '/ipfs/:hash/*',
-      {
-        schema: {
-          params: {
-            type: 'object',
-            properties: { hash: { type: 'string', description: 'File hash being requested' } },
-          },
-          response: {
-            200: { description: 'The file identified by the requested hash', type: 'string' },
-            400: { description: 'An error occurred', type: 'string' }
-          },
-        },
-      },
-      (request, reply) => {
-        const encryptedHash = request.params.hash
-        const requestPathTail = request.params['*']
-
-        let decryptedHash
-        try {
-          decryptedHash = this.outpostWorker.decryptHash(encryptedHash)
-        } catch (e) {
-          return reply.code(400).send('Unable to decrypt a hash')
-        }
-
-        try {
-          const [availableUntilISO, hash] = decryptedHash.split('|')
-          
-          const dateAvailableUntil = new Date(availableUntilISO), currentDate = new Date()
-          if (dateAvailableUntil < currentDate) {
-            return reply.code(400).send('Signature expired. Please access a file/folder again using our api server')
-          }
-
-          const tail = requestPathTail ? `/${requestPathTail}` : ''
-          const redirectUrl = `${process.env.IPFS_GATEWAY_URL}/ipfs/${hash}${tail}`
-          return reply.from(redirectUrl)
-        } catch (e) {
-          return reply.code(500).send('An error occurred while fetching contents by hash')
-        }
-      }
-    )
+    this.fastify.get('/ipfs/:hash/*', { schema: getObjByHashSchema }, getObjByHashHandler)
+    this.fastify.get('/ipfs/:hash', { schema: handleNoHashRedirectSchema }, handleNoHashRedirectHandler)
   }
 }
 
