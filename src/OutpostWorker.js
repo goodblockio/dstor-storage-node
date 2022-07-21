@@ -45,6 +45,16 @@ class OutpostWorker {
     }
 
     async handleMessageObject(messageObj) {
+        const messageTypesToNotLog = ['hash-crypto-key']
+
+        if (!messageTypesToNotLog.includes(messageObj.type)) {
+            let loggerMsg = `message: ${message.data}`
+            if (loggerMsg.length > 1000){
+                loggerMsg = loggerMsg.slice(0, 1000) + '...'
+            }
+            this.logger.info(loggerMsg)
+        }
+
         switch (messageObj.type) {
             case 'login':
                 this.logger.info(`Login success=${messageObj.success}`)
