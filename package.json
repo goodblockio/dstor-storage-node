@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@fastify/cors": "^8.0.0",
     "@fastify/reply-from": "^8.1.0",
     "axios": "^0.19.2",
     "crypto": "^1.0.1",

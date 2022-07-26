@@ -1,6 +1,7 @@
 const fastify = require('fastify')
 const fastifyGracefulShutdown = require('fastify-graceful-shutdown')
 const fastifyReplyFrom = require('@fastify/reply-from')
+const fastifyCors = require('@fastify/cors')
 
 const pino = require('pino')
 const { getObjByHashSchema, handleNoHashRedirectSchema } = require('./utils/httpSchemas')
@@ -30,6 +31,9 @@ class OutpostHttpServer {
     })
 
     this.fastify.register(fastifyGracefulShutdown)
+    this.fastify.register(fastifyCors, {
+      origin: true,
+    })
     this.fastify.register(fastifyReplyFrom, {
       http: {
         agentOptions: { keepAliveMsecs: 10 * 60 * 1000 }, // 10 mins
