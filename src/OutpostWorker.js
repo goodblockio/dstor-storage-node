@@ -168,7 +168,7 @@ class OutpostWorker {
             try {
                 await func(...args)
             } catch (e) {
-                this.logger.error(e)
+                this.logger.error(`An exception was thrown, but we're proceeding. ${e}`)
             }
         }
 
