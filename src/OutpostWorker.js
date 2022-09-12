@@ -134,7 +134,7 @@ class OutpostWorker {
         try {
             await this.ipfs.pin.rm(CID.parse(fileHash))
         } catch (e) {
-            if (e.message.contains('not pinned or pinned indirectly')) {
+            if (e.message.includes('not pinned or pinned indirectly')) {
                 this.logger.warn(`Couldn't unpin a file with hash ${fileHash} as it's not pinned or pinned indirectly`)
             } else {
                 throw e
