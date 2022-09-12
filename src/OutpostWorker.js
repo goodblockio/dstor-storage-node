@@ -247,6 +247,13 @@ class OutpostWorker {
             data: { success }
         })
     }
+
+    async sendObjectAccessedMessage(key, requestPathTail) {
+        this.send({
+            type: 'object-accessed',
+            data: { key, requestPathTail }
+        })
+    }
 }
 
 module.exports = OutpostWorker
