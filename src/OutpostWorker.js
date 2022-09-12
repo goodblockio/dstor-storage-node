@@ -151,6 +151,7 @@ class OutpostWorker {
     }
 
     async handleListToBePinned(messageObj){
+        return
         this.logger.info('Handling list of hashes to be pinned')
         const hashesToBePinned = messageObj.data
         const currentlyPinnedHashes = (
