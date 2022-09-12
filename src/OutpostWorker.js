@@ -65,6 +65,8 @@ class OutpostWorker {
                 break;
             case 'to-be-pinned':
                 await this.handleListToBePinned(messageObj)
+                this.logger.info('Sending to-be-pinned-done message')
+                this.send({ type: 'to-be-pinned-done' })
                 break;
             case 'pin':
                 await this.handlePin(messageObj)
