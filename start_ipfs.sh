@@ -16,7 +16,6 @@ if [ -e "$repo/config" ]; then
 else
   ipfs init
   ipfs bootstrap rm --all
-  ipfs bootstrap add /ip4/10.22.0.5/tcp/4001/p2p/12D3KooWJdRU918cCiDemqY2nH6rcR35GGhBH9CFkiBSP137g8Mb
   ipfs config Addresses.API /ip4/0.0.0.0/tcp/5001
   ipfs config Addresses.Gateway /ip4/0.0.0.0/tcp/8080
   ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]'
