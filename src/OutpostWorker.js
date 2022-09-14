@@ -241,7 +241,9 @@ class OutpostWorker {
     }
 
     async updatePeersConfig(messageObj) {
-        const success = await this._wgmanager.replaceCurrentConfigAndReload(messageObj.confContent, messageObj.swarmKey)
+        const success = await this._wgmanager.replaceCurrentConfigAndReload(
+            messageObj.confContent, messageObj.swarmKey, messageObj.bootstrapAddresses
+        )
         this.logger.info('Sending peers-config-updated message')
         this.send({
             type: 'peers-config-updated',

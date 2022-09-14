@@ -46,8 +46,9 @@ class WGManager {
         }
 
         let stdErrMessage = ''
+        let stdOutMessage = ''
 
-        proc.stdout && proc.stdout.on('data', () => { })
+        proc.stdout && proc.stdout.on('data', buf => { stdOutMessage += buf.toString() + '\n' })
         proc.stderr && proc.stderr.on('data', buf => { stdErrMessage += buf.toString() + '\n' })
 
         proc.on('error', function (error) {
@@ -59,7 +60,7 @@ class WGManager {
           if (code !== 0 && !ignoreErrors) {
             reject(new Error(`${errorMsg}: ${stdErrMessage}`))
           } else {
-            resolve()
+            resolve(stdOutMessage)
           }
         })
       }
@@ -70,7 +71,31 @@ class WGManager {
     return this.currentPeerData
   }
 
-  async replaceCurrentConfigAndReload(confContent, swarmKey) {
+  async getCurrentBootstrapAddresses() {
+    const bootstrapListText = await this.spawnProcessAwaitable(
+      'ipfs', ['bootstrap', 'list'], {},
+      'An error occurred while getting current IPFS bootstrap list'
+    )
+    return bootstrapListText.trim().split('\n')
+  }
+
+  async addBootstrapAddress(bootstrapAddress) {
+    await this.spawnProcessAwaitable(
+      'ipfs', ['bootstrap', 'add', bootstrapAddress], {},
+      `An error occurred while adding a new IPFS bootstrap address: ${bootstrapAddress}`
+    )
+  }
+
+  async setBootstrapAddresses(bootstrapAddresses) {
+    const currentAddresses = await this.getCurrentBootstrapAddresses()
+    for (const bootstrapAddress of bootstrapAddresses) {
+      if (!currentAddresses.includes(bootstrapAddress)) {
+        await this.addBootstrapAddress(bootstrapAddress)
+      }
+    }
+  }
+
+  async replaceCurrentConfigAndReload(confContent, swarmKey, bootstrapAddresses) {
     try {
       this.logger.info('Replacing current wg0.conf, swarm.key and reloading...')
       const tempConfigName = 'tmp.conf'
@@ -86,6 +111,8 @@ class WGManager {
         'bash', ['-c', `echo ${this.sudoPWD} | sudo -S mv ${tempSwarmFileName} ${swarmFileDestination}`], {},
         `An error occurred while moving swarm key file to ${swarmFileDestination}`
       )
+
+      await this.setBootstrapAddresses(bootstrapAddresses)
 
       await this.spawnProcessAwaitable(
         'bash', ['-c', `echo ${this.sudoPWD} | sudo -S pkill ipfs`], {},
