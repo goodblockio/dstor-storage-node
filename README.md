@@ -91,6 +91,6 @@ Once a day (01:00 UTC) or when a new storage node connects to the server the ser
 
 
 ## Social
-Join us on telegram at [dStor Exclusive Beta](https://t.me/+Y_ZInOK9phgxZjFh)
+Join us on telegram at [dStor - Decentralized Storage for the New Internet](https://t.me/dstor_cloud)
 
 Follow us on Twitter at [@dStor_cloud](https://twitter.com/dstor_cloud)
