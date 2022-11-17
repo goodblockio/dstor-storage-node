@@ -5,7 +5,7 @@ This was built on Ubuntu 18.04, but will work for Ubuntu 20.04 and 22.04.
 ### Pre-requirements to install: 
 #### Have an account at app.dstor.cloud
 #### Obtain your Outpost API Key at app.dstor.cloud.
-#### Obtain your [nodename].dstor.cloud address from a dStor Administrator (in telegram).
+#### Obtain your [6 character nodename].dstor.cloud address from a dStor Administrator (in telegram).
 #### Read minimum requirements information here: https://goodblock.gitbook.io/dstor-documentation-1/for-node-operators
 
 ### Create your own user to install and run dstor under. Do not run as root.
