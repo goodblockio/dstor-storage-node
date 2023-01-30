@@ -1,4 +1,5 @@
 const { STANDART_HASH_SIZE } = require("./constants")
+const {performance} = require("perf_hooks");
 
 const replyFromIPFS = (reply, requestPathTail, hash) => {
   try {
@@ -10,9 +11,13 @@ const replyFromIPFS = (reply, requestPathTail, hash) => {
   }
 }
 
-const getObjByHashHandler = async (httpServer, request, reply) => {
+const getObjByHashHandler = async (httpServer, request, reply, serverTimingFlag = false) => {
   const hashFromParams = request.params.hash
   const requestPathTail = request.params['*']
+
+  let serverTiming = []
+
+  if(serverTimingFlag) serverTiming.push({ t: performance.now(), d: "Start Time" })
 
   if (hashFromParams.length === STANDART_HASH_SIZE) {
     return replyFromIPFS(reply, requestPathTail, hashFromParams)
