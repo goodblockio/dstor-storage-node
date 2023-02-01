@@ -7,10 +7,17 @@ const replyFromIPFS = (reply, requestPathTail, hash, serverTiming, serverTimingF
     const tail = requestPathTail ? `/${requestPathTail}` : ''
     const redirectUrl = `${process.env.IPFS_GATEWAY_URL}/ipfs/${hash}${tail}`
     if(serverTimingFlag){
-      serverTiming.push({ t: performance.now(), d: "Url redirect" })
+      serverTiming.push({ t: performance.now(), d: "Preparing for a redirect" })
+    }
+
+    reply.from(redirectUrl)
+
+    if(serverTimingFlag){
+      serverTiming.push({ t: performance.now(), d: "Redirect on ipfs port" })
       reply.header('Server-Timing', `${createServerTiming(serverTiming)}`)
     }
-    return reply.from(redirectUrl)
+
+    return reply.code(200)
   } catch (e) {
     if(serverTimingFlag){
       serverTiming.push({ t: performance.now(), d: "Url redirect error" })
